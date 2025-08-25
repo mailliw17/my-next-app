@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function Register() {
@@ -15,6 +15,7 @@ export default function Register() {
     const res = await fetch("/api/auth/register", {
       method: "POST",
       body: JSON.stringify({
+        //get the value by "name" in html structure
         fullname: e.target.fullname.value,
         email: e.target.email.value,
         password: e.target.password.value,
@@ -22,7 +23,7 @@ export default function Register() {
     });
 
     if (res.status === 200) {
-      e.target.reset();
+      e.target.reset(); //empty the form
       setIsLoading(false);
       push("/login");
     } else {
@@ -32,8 +33,8 @@ export default function Register() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div>Test</div>
+    <main className="h-screen w-100 flex justify-center items-center flex-col">
+      {error !== "" && <div className="text-red-600">{error}</div>}
       <div className="max-w-md mx-auto mt-12 p-8 bg-white shadow rounded">
         <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
         <form onSubmit={(e) => handleSubmit(e)}>
