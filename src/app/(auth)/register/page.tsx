@@ -86,10 +86,11 @@ export default function Register() {
             </Link>
           </div>
           <button
+            disabled={isLoading}
             type="submit"
             className="w-full bg-green-600 text-white font-semibold py-2 rounded hover:bg-green-700 transition"
           >
-            Register
+            {isLoading ? "Loading..." : "Register"}
           </button>
         </form>
       </div>
