@@ -1,20 +1,50 @@
+"use client";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useState } from "react";
 
 export default function Register() {
+  const { push } = useRouter();
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
+    setError("");
+    setIsLoading(true);
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify({
+        fullname: e.target.fullname.value,
+        email: e.target.email.value,
+        password: e.target.password.value,
+      }),
+    });
+
+    if (res.status === 200) {
+      e.target.reset();
+      setIsLoading(false);
+      push("/login");
+    } else {
+      setError("Email Already Exist");
+      setIsLoading(false);
+    }
+  };
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
+      <div>Test</div>
       <div className="max-w-md mx-auto mt-12 p-8 bg-white shadow rounded">
         <h2 className="text-2xl font-bold mb-6 text-center">Register</h2>
-        <form>
+        <form onSubmit={(e) => handleSubmit(e)}>
           <div className="mb-4">
             <label htmlFor="name" className="block text-sm font-medium mb-1">
-              Name
+              Fullname
             </label>
             <input
               type="text"
-              id="name"
-              name="name"
+              id="fullname"
+              name="fullname"
               required
               className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring focus:border-blue-400"
             />
