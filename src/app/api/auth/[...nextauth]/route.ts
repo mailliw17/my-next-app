@@ -16,27 +16,37 @@ import { NextRequest, NextResponse } from "next/server";
 const handler = NextAuth({
   providers: [
     CredentialsProvider({
+      //enables username/password (or custome fields) authentication
       name: "Credentials",
+
+      //defined the form fields needed, this well be automatically generated if using nextauthJs
+      // but if using custom login page, these definistions are informational only
       credentials: {
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
 
+      // this core authentication logic
       async authorize(credentials: any) {
-        if (!credentials?.email || !credentials?.passowrd) return null;
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error("Email and password are required");
+        }
 
         // search user from firestore user the service
         const user = await login({ email: credentials.email });
 
+        //check if user exists
         if (!user) {
           throw new Error("Email or password incorrect");
         }
 
         // compare password from input login VS password hash DB
-        const isValid = await compare(credentials.password, user.password);
-
-        if (!isValid) {
-          throw new Error("Password incorrect");
+        const passwordMatch = await compare(
+          credentials.password,
+          user.password
+        );
+        if (!passwordMatch) {
+          throw new Error("Email or password incorrect");
         }
 
         // if valid, return object user
@@ -54,7 +64,15 @@ const handler = NextAuth({
     signIn: "/login", //custom login page (not using default NextAuth page)
     error: "/login", //redirect to login if error
   },
+
+  session: {
+    strategy: "jwt", //for session management
+    maxAge: 60 * 60 * 24 * 7, //1 week
+  },
+
+  // define functions that modify the behaviour of nextauth.js
   callbacks: {
+    //customize the JWT content
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
@@ -64,8 +82,9 @@ const handler = NextAuth({
       return token;
     },
 
+    // customize the session object
     async session({ session, token }) {
-      if (token) {
+      if (token && session.user) {
         session.user.id = token.id;
         session.user.role = token.role;
         session.user.fullname = token.fullname;
@@ -73,11 +92,15 @@ const handler = NextAuth({
       return session;
     },
 
-    async redirect({ url, baseUrl }) {
-      return "/dashboard"; //if success login, redirect to dashboard
-    },
+    //overrides nextauth default redirect logic
+    // this function will active when the page.tsx (in login) without command "redirect:false"
+    // async redirect({ url, baseUrl }) {
+    //   console.log("Redirect callback called with:", { url, baseUrl });
+    //   return `${baseUrl}/dashboard/product`; //if success login, redirect to dashboard
+    //   // return "/dashboard/product";
+    // },
   },
-  secret: "123456",
+  secret: process.env.NEXTAUTH_SECRET,
 });
 
 export { handler as GET, handler as POST };

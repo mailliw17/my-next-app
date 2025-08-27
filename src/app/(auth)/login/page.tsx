@@ -1,23 +1,69 @@
 "use client";
+import { signIn } from "next-auth/react";
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 export default function Login() {
-  const handleLogin = (e: any) => {
+  // const handleLogin = (e: any) => {
+  //   e.preventDefault();
+  //   fetch("/api/auth/login", {
+  //     method: "POST",
+  //     body: JSON.stringify({
+  //       email: e.currentTarget.email.value,
+  //       password: e.currentTarget.password.value,
+  //     }),
+  //   });
+  // };
+
+  const router = useRouter();
+  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleLogin = async (e: any) => {
     e.preventDefault();
-    fetch("/api/auth/login", {
-      method: "POST",
-      body: JSON.stringify({
-        email: e.currentTarget.email.value,
-        password: e.currentTarget.password.value,
-      }),
-    });
+    setIsLoading(true);
+    setError("");
+
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+
+    //tries to authenticate the user using NextAuth.js
+    try {
+      const result = await signIn("credentials", {
+        email,
+        password,
+        redirect: false, // prevents NextAuth from handling redirection
+      });
+
+      console.log("SignIn result:", result);
+
+      if (result?.error) {
+        setError(result.error);
+      } else if (result?.ok) {
+        setTimeout(() => {
+          router.push("/dashboard/product");
+        }, 300);
+      }
+    } catch (error) {
+      setError("An unexpected error occured");
+      console.error(error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <div className="max-w-md mx-auto mt-12 p-8 bg-white shadow rounded">
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+        {error && (
+          <div className="mb-4 p-2 bg-red-100 border border-red-400 text-red-700 rounded">
+            {error}
+          </div>
+        )}
         <form onSubmit={(e) => handleLogin(e)}>
           <div className="mb-4">
             <label htmlFor="email" className="block text-sm font-medium mb-1">
@@ -59,7 +105,7 @@ export default function Login() {
             type="submit"
             className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition"
           >
-            Login
+            {isLoading ? "Logging in..." : "Login"}
           </button>
         </form>
       </div>

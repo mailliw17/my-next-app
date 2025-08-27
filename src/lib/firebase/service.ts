@@ -10,6 +10,7 @@ import {
 } from "firebase/firestore";
 import app from "./init";
 import * as bcrypt from "bcrypt";
+import { User } from "@/types/user";
 
 const firestore = getFirestore(app);
 
@@ -64,7 +65,7 @@ export async function register(data: {
   }
 }
 
-export async function login(data: { email: string }) {
+export async function login(data: { email: string }): Promise<User | null> {
   const q = query(
     collection(firestore, "users"),
     where("email", "==", data.email)
@@ -74,7 +75,7 @@ export async function login(data: { email: string }) {
   const user = snapshot.docs.map((doc) => ({
     id: doc.id,
     ...doc.data(),
-  }));
+  })) as User[];
 
   if (user) {
     return user[0];
