@@ -1,5 +1,3 @@
-"use client";
-import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "./navbar";
@@ -15,15 +13,13 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
   return (
     <html lang="en">
-      {/* <body className={inter.className}>
-        {!disableNavbar.includes(pathname) && <Navbar></Navbar>}
-        {children}
-      </body> */}
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <Navbar></Navbar>
+          {children}
+        </Providers>
       </body>
     </html>
   );

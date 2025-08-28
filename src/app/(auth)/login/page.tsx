@@ -6,17 +6,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function Login() {
-  // const handleLogin = (e: any) => {
-  //   e.preventDefault();
-  //   fetch("/api/auth/login", {
-  //     method: "POST",
-  //     body: JSON.stringify({
-  //       email: e.currentTarget.email.value,
-  //       password: e.currentTarget.password.value,
-  //     }),
-  //   });
-  // };
-
   const router = useRouter();
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -43,9 +32,7 @@ export default function Login() {
       if (result?.error) {
         setError(result.error);
       } else if (result?.ok) {
-        setTimeout(() => {
-          router.push("/dashboard/product");
-        }, 300);
+        router.push("/dashboard/product");
       }
     } catch (error) {
       setError("An unexpected error occured");
